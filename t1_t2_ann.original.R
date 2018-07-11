@@ -113,8 +113,11 @@ cleanHbA1cData$timeSeriesDataPoint <- cleanHbA1cData$hba1cNumeric
   merge_hb = subset(merge_hb, diagnosisDate_unix > returnUnixDateTime("2000-01-01"))
   
   merge_hb[, c("hba1c_TP1", "hba1c_TP2", "hba1c_TP3", "hba1c_TP4") := valuesCloseToTime(hb_dateplustime1, hba1cNumeric, diagnosisDate_unix[1], c(0, 12, 24, 36)) , by=.(LinkId)]
+  merge_hb[, c("sequenceN") := seq(1, .N, 1) , by=.(LinkId)]
+  merge_hb <- merge_hb[sequenceN == 1]
   
-  # generate sbpA1c points
+  
+  # generate sbp points
   merge_sbp <- merge(sbp_DT_forMerge, cut_diagDT, by = "LinkId")
   # cut out all values that appear more than 1y prior to recorded diagnosis
   merge_sbp <- subset(merge_sbp, (diagnosisDate_unix - sbp_dateplustime1) < (60*60*24*365.25))
@@ -122,68 +125,40 @@ cleanHbA1cData$timeSeriesDataPoint <- cleanHbA1cData$hba1cNumeric
   merge_sbp = subset(merge_sbp, diagnosisDate_unix > returnUnixDateTime("2000-01-01"))
   
   merge_sbp[, c("sbp_TP1", "sbp_TP2", "sbp_TP3", "sbp_TP4") := valuesCloseToTime(sbp_dateplustime1, sbpNumeric, diagnosisDate_unix[1], c(0, 12, 24, 36)) , by=.(LinkId)]
+  merge_sbp[, c("sequenceN") := seq(1, .N, 1) , by=.(LinkId)]
+  merge_sbp <- merge_sbp[sequenceN == 1]
+  output_merge_sbp <- data.frame(merge_sbp$LinkId, merge_sbp$sbp_TP1, merge_sbp$sbp_TP2, merge_sbp$sbp_TP3, merge_sbp$sbp_TP4); colnames(output_merge_sbp) <- c("LinkId", "sbp_TP1", "sbp_TP2", "sbp_TP3", "sbp_TP4")
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-# cleanRenalData <- read.csv("~/R/GlCoSy/SD_workingSource/renalSetDTclean.csv", sep=",", header = TRUE, row.names = NULL)
-#   cleanRenalDataDT <- data.table(cleanRenalData)
-#   renal_DT_forMerge <- data.table(cleanRenalDataDT$LinkId, cleanRenalDataDT$dateplustime1, cleanRenalDataDT$egfrNumeric)
-#   colnames(renal_DT_forMerge) <- c("LinkId", "egfr_dateplustime1", "egfrNumeric")
-
-
-# find closest value to diagnosis date for each parameter - sequential merge
-
-# hba1c
-merge_hb <- merge(hb_DT_forMerge, cut_diagDT, by = "LinkId")
-merge_hb[, c("hb_diffFromDiag") := sqrt((hb_dateplustime1 - diagnosisDate_unix) ^ 2) , by=.(LinkId)]
-merge_hb[, c("hb_flagClosest") := ifelse(hb_diffFromDiag == min(hb_diffFromDiag), 1, 0) , by=.(LinkId)]
-
-merge_hb <- merge_hb[(hb_diffFromDiag < paramFromDiagnosisWindowSeconds) & hb_flagClosest == 1]
-merge_hb <- merge_hb[diff(merge_hb$LinkId) != 0]
-
-# SBP
-merge_sbp <- merge(merge_hb, sbp_DT_forMerge, by = "LinkId")
-merge_sbp[, c("sbp_diffFromDiag") := sqrt((sbp_dateplustime1 - diagnosisDate_unix) ^ 2) , by=.(LinkId)]
-merge_sbp[, c("sbp_flagClosest") := ifelse(sbp_diffFromDiag == min(sbp_diffFromDiag), 1, 0) , by=.(LinkId)]
-
-merge_sbp <- merge_sbp[(sbp_diffFromDiag < paramFromDiagnosisWindowSeconds) & sbp_flagClosest == 1]
-merge_sbp <- merge_sbp[diff(merge_sbp$LinkId) != 0]
-
-
-# DBP
-merge_dbp <- merge(merge_sbp, dbp_DT_forMerge, by = "LinkId")
-merge_dbp[, c("dbp_diffFromDiag") := sqrt((dbp_dateplustime1 - diagnosisDate_unix) ^ 2) , by=.(LinkId)]
-merge_dbp[, c("dbp_flagClosest") := ifelse(dbp_diffFromDiag == min(dbp_diffFromDiag), 1, 0) , by=.(LinkId)]
-
-merge_dbp <- merge_dbp[(dbp_diffFromDiag < paramFromDiagnosisWindowSeconds) & dbp_flagClosest == 1]
-merge_dbp <- merge_dbp[diff(merge_dbp$LinkId) != 0]
-
-# BMI
-merge_bmi <- merge(merge_dbp, bmi_DT_forMerge, by = "LinkId")
-merge_bmi[, c("bmi_diffFromDiag") := sqrt((bmi_dateplustime1 - diagnosisDate_unix) ^ 2) , by=.(LinkId)]
-merge_bmi[, c("bmi_flagClosest") := ifelse(bmi_diffFromDiag == min(bmi_diffFromDiag), 1, 0) , by=.(LinkId)]
-
-merge_bmi <- merge_bmi[(bmi_diffFromDiag < paramFromDiagnosisWindowSeconds) & bmi_flagClosest == 1]
-merge_bmi <- merge_bmi[diff(merge_bmi$LinkId) != 0]
-
-
-# renal
-# merge_renal <- merge(merge_bmi, renal_DT_forMerge, by = "LinkId")
-# merge_renal[, c("egfr_diffFromDiag") := sqrt((egfr_dateplustime1 - diagnosisDate_unix) ^ 2) , by=.(LinkId)]
-# merge_renal[, c("egfr_flagClosest") := ifelse(egfr_diffFromDiag == min(egfr_diffFromDiag), 1, 0) , by=.(LinkId)]
-# 
-# merge_renal <- merge_renal[(egfr_diffFromDiag < paramFromDiagnosisWindowSeconds) & egfr_flagClosest == 1]
-
-# finalset
-diagnostic_test_set <- merge_bmi
+    # generate dbp points
+    merge_dbp <- merge(dbp_DT_forMerge, cut_diagDT, by = "LinkId")
+    # cut out all values that appear more than 1y prior to recorded diagnosis
+    merge_dbp <- subset(merge_dbp, (diagnosisDate_unix - dbp_dateplustime1) < (60*60*24*365.25))
+    # this still leave individuals who were diagnosed long before recording of dbp was started. cut to diagnosis > 2000
+    merge_dbp = subset(merge_dbp, diagnosisDate_unix > returnUnixDateTime("2000-01-01"))
+    
+    merge_dbp[, c("dbp_TP1", "dbp_TP2", "dbp_TP3", "dbp_TP4") := valuesCloseToTime(dbp_dateplustime1, dbpNumeric, diagnosisDate_unix[1], c(0, 12, 24, 36)) , by=.(LinkId)]
+    merge_dbp[, c("sequenceN") := seq(1, .N, 1) , by=.(LinkId)]
+    merge_dbp <- merge_dbp[sequenceN == 1]
+    output_merge_dbp <- data.frame(merge_dbp$LinkId, merge_dbp$dbp_TP1, merge_dbp$dbp_TP2, merge_dbp$dbp_TP3, merge_dbp$dbp_TP4); colnames(output_merge_dbp) <- c("LinkId", "dbp_TP1", "dbp_TP2", "dbp_TP3", "dbp_TP4")   
+    
+      # generate bmi points
+      merge_bmi <- merge(bmi_DT_forMerge, cut_diagDT, by = "LinkId")
+      # cut out all values that appear more than 1y prior to recorded diagnosis
+      merge_bmi <- subset(merge_bmi, (diagnosisDate_unix - bmi_dateplustime1) < (60*60*24*365.25))
+      # this still leave individuals who were diagnosed long before recording of bmi was started. cut to diagnosis > 2000
+      merge_bmi = subset(merge_bmi, diagnosisDate_unix > returnUnixDateTime("2000-01-01"))
+      
+      merge_bmi[, c("bmi_TP1", "bmi_TP2", "bmi_TP3", "bmi_TP4") := valuesCloseToTime(bmi_dateplustime1, bmiNumeric, diagnosisDate_unix[1], c(0, 12, 24, 36)) , by=.(LinkId)]
+      merge_bmi[, c("sequenceN") := seq(1, .N, 1) , by=.(LinkId)]
+      merge_bmi <- merge_bmi[sequenceN == 1]
+      output_merge_bmi <- data.frame(merge_bmi$LinkId, merge_bmi$bmi_TP1, merge_bmi$bmi_TP2, merge_bmi$bmi_TP3, merge_bmi$bmi_TP4); colnames(output_merge_bmi) <- c("LinkId", "bmi_TP1", "bmi_TP2", "bmi_TP3", "bmi_TP4")
+      
+## final merge to output
+      outputFrame <- merge(merge_hb, output_merge_sbp, by = "LinkId")
+      outputFrame <- merge(outputFrame, output_merge_dbp, by = "LinkId")
+      outputFrame <- merge(outputFrame, output_merge_bmi, by = "LinkId")
+      
+      diagnostic_test_set = outputFrame
 
 # remove duplicates
 #diagnostic_test_set <- unique(diagnostic_test_set)
@@ -200,23 +175,27 @@ diagnostic_test_set <- diagnostic_test_set[substr(Ethnicity,1,3) != "ECD"]
 
 diagnostic_test_set$ageAtDiagnosis <- (diagnostic_test_set$diagnosisDate_unix - diagnostic_test_set$DOB_unix) / (60*60*24*365.25)
 
-diagnostic_test_set_withID <- data.table(diagnostic_test_set$LinkId, diagnostic_test_set$ageAtDiagnosis, diagnostic_test_set$Ethnicity, diagnostic_test_set$Sex, diagnostic_test_set$hba1cNumeric, diagnostic_test_set$sbpNumeric, diagnostic_test_set$dbpNumeric,  diagnostic_test_set$bmiNumeric, diagnostic_test_set$diabetesType)
+diagnostic_test_set_withID <- data.table(diagnostic_test_set$LinkId, diagnostic_test_set$ageAtDiagnosis, diagnostic_test_set$Ethnicity, diagnostic_test_set$Sex,
+                                         diagnostic_test_set$hba1c_TP1, diagnostic_test_set$hba1c_TP2, diagnostic_test_set$hba1c_TP3, diagnostic_test_set$hba1c_TP4,
+                                         diagnostic_test_set$sbp_TP1, diagnostic_test_set$sbp_TP2, diagnostic_test_set$sbp_TP3, diagnostic_test_set$sbp_TP4,
+                                         diagnostic_test_set$dbp_TP1, diagnostic_test_set$dbp_TP2, diagnostic_test_set$dbp_TP3, diagnostic_test_set$dbp_TP4,
+                                         diagnostic_test_set$bmi_TP1, diagnostic_test_set$bmi_TP2, diagnostic_test_set$bmi_TP3, diagnostic_test_set$bmi_TP4,
+                                         diagnostic_test_set$diabetesType)
 
-colnames(diagnostic_test_set_withID) <- c("LinkId", "age", "ethnicity", "sex", "hba1c", "sbp", "dbp", "bmi", "diabetesType")
+colnames(diagnostic_test_set_withID) <- c("LinkId", "age", "ethnicity", "sex", "hba1c1","hba1c2","hba1c3","hba1c4", "sbp1","sb21","sbp3","sbp4", "dbp1","dbp2","dbp3","dbp4", "bmi1","bmi2","bmi3","bmi4", "diabetesType")
 
-diagnostic_test_set <- data.table(diagnostic_test_set$ageAtDiagnosis, diagnostic_test_set$Ethnicity, diagnostic_test_set$Sex, diagnostic_test_set$hba1cNumeric, diagnostic_test_set$sbpNumeric, diagnostic_test_set$dbpNumeric,  diagnostic_test_set$bmiNumeric, diagnostic_test_set$diabetesType)
-
-colnames(diagnostic_test_set) <- c("age", "ethnicity", "sex", "hba1c", "sbp", "dbp", "bmi", "diabetesType")
+diagnostic_test_set_withoutID <- diagnostic_test_set_withID
+diagnostic_test_set_withoutID$LinkId <- NULL
 
 # summary(diagnostic_test_set)
 # summary(subset(diagnostic_test_set, diabetesType == 1))
 # summary(subset(diagnostic_test_set, diabetesType == 0))
 
 
-write.table(diagnostic_test_set, file = "~/R/_workingDirectory/t1_t2_ANN/diagSet_7p.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(diagnostic_test_set_withID, file = "~/R/_workingDirectory/t1_t2_ANN/diagSet_7p_withID.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(diagnostic_test_set_withoutID, file = "~/R/_workingDirectory/dataClean/diagSet_quasiTS.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+# write.table(diagnostic_test_set_withID, file = "~/R/_workingDirectory/t1_t2_ANN/diagSet_7p_withID.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
-
+'''
 ## read in csv output from ann
 ## turn ethnicity levels into readable output for physician interpretation
 
@@ -500,3 +479,4 @@ physician_pool <- rbind(t1_table, random_t2_sample)
     
     
     
+'''
