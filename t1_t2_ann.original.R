@@ -62,22 +62,22 @@ cleanHbA1cData$timeSeriesDataPoint <- cleanHbA1cData$hba1cNumeric
   hb_DT_forMerge <- data.table(cleanHbA1cDataDT$LinkId, cleanHbA1cDataDT$dateplustime1, cleanHbA1cDataDT$hba1cNumeric)
   colnames(hb_DT_forMerge) <- c("LinkId", "hb_dateplustime1", "hba1cNumeric")
 
-cleanSBPData <- read.csv("~/R/GlCoSy/SD_workingSource/SBPsetDTclean.csv", sep=",", header = TRUE, row.names = NULL)
-cleanSBPData$timeSeriesDataPoint <- cleanSBPData$sbpNumeric
-  cleanSBPDataDT <- data.table(cleanSBPData)
-  sbp_DT_forMerge <- data.table(cleanSBPDataDT$LinkId, cleanSBPDataDT$dateplustime1, cleanSBPDataDT$sbpNumeric)
-  colnames(sbp_DT_forMerge) <- c("LinkId", "sbp_dateplustime1", "sbpNumeric")
+  cleanSBPData <- read.csv("~/R/GlCoSy/SD_workingSource/SBPsetDTclean.csv", sep=",", header = TRUE, row.names = NULL)
+  cleanSBPData$timeSeriesDataPoint <- cleanSBPData$sbpNumeric
+    cleanSBPDataDT <- data.table(cleanSBPData)
+    sbp_DT_forMerge <- data.table(cleanSBPDataDT$LinkId, cleanSBPDataDT$dateplustime1, cleanSBPDataDT$sbpNumeric)
+    colnames(sbp_DT_forMerge) <- c("LinkId", "sbp_dateplustime1", "sbpNumeric")
   
-cleanDBPData <- read.csv("~/R/GlCoSy/SD_workingSource/DBPsetDTclean.csv", sep=",", header = TRUE, row.names = NULL)
-cleanDBPData$timeSeriesDataPoint <- cleanDBPData$dbpNumeric
-  cleanDBPDataDT <- data.table(cleanDBPData)
-  dbp_DT_forMerge <- data.table(cleanDBPDataDT$LinkId, cleanDBPDataDT$dateplustime1, cleanDBPDataDT$dbpNumeric)
-  colnames(dbp_DT_forMerge) <- c("LinkId", "dbp_dateplustime1", "dbpNumeric")
+    cleanDBPData <- read.csv("~/R/GlCoSy/SD_workingSource/DBPsetDTclean.csv", sep=",", header = TRUE, row.names = NULL)
+    cleanDBPData$timeSeriesDataPoint <- cleanDBPData$dbpNumeric
+      cleanDBPDataDT <- data.table(cleanDBPData)
+      dbp_DT_forMerge <- data.table(cleanDBPDataDT$LinkId, cleanDBPDataDT$dateplustime1, cleanDBPDataDT$dbpNumeric)
+      colnames(dbp_DT_forMerge) <- c("LinkId", "dbp_dateplustime1", "dbpNumeric")
 
-cleanBMIData <- read.csv("~/R/GlCoSy/SD_workingSource/BMISetDTclean.csv", sep=",", header = TRUE, row.names = NULL)
-  cleanBMIDataDT <- data.table(cleanBMIData)
-  bmi_DT_forMerge <- data.table(cleanBMIDataDT$LinkId, cleanBMIDataDT$dateplustime1, cleanBMIDataDT$bmiNumeric)
-  colnames(bmi_DT_forMerge) <- c("LinkId", "bmi_dateplustime1", "bmiNumeric")
+      cleanBMIData <- read.csv("~/R/GlCoSy/SD_workingSource/BMISetDTclean.csv", sep=",", header = TRUE, row.names = NULL)
+        cleanBMIDataDT <- data.table(cleanBMIData)
+        bmi_DT_forMerge <- data.table(cleanBMIDataDT$LinkId, cleanBMIDataDT$dateplustime1, cleanBMIDataDT$bmiNumeric)
+        colnames(bmi_DT_forMerge) <- c("LinkId", "bmi_dateplustime1", "bmiNumeric")
   
 # find values at time points for each ID
 # ?how to deal with missingness
@@ -121,7 +121,7 @@ cleanBMIData <- read.csv("~/R/GlCoSy/SD_workingSource/BMISetDTclean.csv", sep=",
   # this still leave individuals who were diagnosed long before recording of sbp was started. cut to diagnosis > 2000
   merge_sbp = subset(merge_sbp, diagnosisDate_unix > returnUnixDateTime("2000-01-01"))
   
-  merge_sbp[, c("sbpa1c_TP1", "sbpa1c_TP2", "sbpa1c_TP3", "sbpa1c_TP4") := valuesCloseToTime(sbp_dateplustime1, sbpa1cNumeric, diagnosisDate_unix[1], c(0, 12, 24, 36)) , by=.(LinkId)]
+  merge_sbp[, c("sbp_TP1", "sbp_TP2", "sbp_TP3", "sbp_TP4") := valuesCloseToTime(sbp_dateplustime1, sbpNumeric, diagnosisDate_unix[1], c(0, 12, 24, 36)) , by=.(LinkId)]
   
   
   
