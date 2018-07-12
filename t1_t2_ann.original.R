@@ -191,6 +191,12 @@ diagnostic_test_set_withoutID$LinkId <- NULL
 # summary(subset(diagnostic_test_set, diabetesType == 1))
 # summary(subset(diagnostic_test_set, diabetesType == 0))
 
+# balance T1/T2
+balancingSampleRows <- sample(nrow(diagnostic_test_set_withoutID[diabetesType == 0]), nrow(diagnostic_test_set_withoutID[diabetesType == 1]))
+balancingT2set <- diagnostic_test_set_withoutID[diabetesType == 0][balancingSampleRows, ]
+
+balancedData <- rbind(diagnostic_test_set_withoutID[diabetesType == 1], balancingT2set)
+
 
 write.table(diagnostic_test_set_withoutID, file = "~/R/_workingDirectory/dataClean/diagSet_quasiTS.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 # write.table(diagnostic_test_set_withID, file = "~/R/_workingDirectory/t1_t2_ANN/diagSet_7p_withID.csv", sep = ",", row.names = FALSE, col.names = TRUE)
