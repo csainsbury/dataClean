@@ -2,6 +2,11 @@
 # generate equivalent sets of each with IDs in order
 ##
 
+returnUnixDateTime<-function(date) {
+  returnVal<-as.numeric(as.POSIXct(date, format="%Y-%m-%d", tz="GMT"))
+  return(returnVal)
+}
+
 # number of follow up years
 n_years = 6
 
@@ -12,6 +17,7 @@ dbp_spline <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/d
 bmi_spline <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/bmi_', n_years, 'y_limitedValues.csv', sep = ""), header = T)
 
 numericalDrugs <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrugsFrame_withID_', n_years, 'y.csv', sep = ""), header = T)
+colnames(numericalDrugs)[ncol(numericalDrugs)] <- c("LinkId")
 drugWords <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWordFrame_withID_', n_years, 'y.csv', sep = ""), header = T)
 
 
@@ -21,7 +27,7 @@ sbpID <- as.data.frame(sbp_spline$LinkId); colnames(sbpID) <- c("LinkId")
 dbpID <- as.data.frame(dbp_spline$LinkId); colnames(dbpID) <- c("LinkId")
 bmiID <- as.data.frame(bmi_spline$LinkId); colnames(bmiID) <- c("LinkId")
 
-numericalDrugsID <- as.data.frame(numericalDrugs$drugWordFrame_forAnalysis.LinkId); colnames(numericalDrugsID) <- c("LinkId")
+numericalDrugsID <- as.data.frame(numericalDrugs$LinkId); colnames(numericalDrugsID) <- c("LinkId")
 drugWordsID <- as.data.frame(drugWords$LinkId); colnames(drugWordsID) <- c("LinkId")
 
 
@@ -49,6 +55,28 @@ sbpComplete_drugWordData = sbp_spline[sbp_spline$LinkId %in% merge_drugWords$Lin
 dbpComplete_drugWordData = dbp_spline[dbp_spline$LinkId %in% merge_drugWords$LinkId,] 
 bmiComplete_drugWordData = bmi_spline[bmi_spline$LinkId %in% merge_drugWords$LinkId,]
 drugs_drugWordData = drugWords[drugWords$LinkId %in% merge_drugWords$LinkId,]
+
+## generate age and gender information
+diagnosisDataset<-read.csv("~/R/GlCoSy/SDsource/demogALL.txt", quote = "", row.names = NULL, stringsAsFactors = FALSE)
+diagnosisDataset_sub <- data.frame(diagnosisDataset$LinkId, diagnosisDataset$CurrentGender_Mapped, diagnosisDataset$BirthDate, diagnosisDataset$DateOfDiagnosisDiabetes_Date); colnames(diagnosisDataset_sub) <- c("LinkId", "sex", "birthDate", "diagnosisDate")
+diagnosisDataset_sub$sex <- ifelse(diagnosisDataset_sub$sex == "Male", 1, 0)
+diagnosisDataset_sub$age = returnUnixDateTime("2011-01-01") - (returnUnixDateTime(as.character(diagnosisDataset_sub$birthDate)))
+diagnosisDataset_sub$age = diagnosisDataset_sub$age / (60*60*24*365.25)
+diagnosisDataset_sub$duration = returnUnixDateTime("2011-01-01") - (returnUnixDateTime(as.character(diagnosisDataset_sub$diagnosisDate)))
+diagnosisDataset_sub$duration = diagnosisDataset_sub$duration / (60*60*24*365.25)
+diagnosisDataset_sub$birthDate <- NULL
+diagnosisDataset_sub$diagnosisDate <- NULL
+
+numerical_diagnosisDataset_X = diagnosisDataset_sub[diagnosisDataset_sub$LinkId %in% merge_numericalDrugs$LinkId,]
+words_diagnosisDataset_X = diagnosisDataset_sub[diagnosisDataset_sub$LinkId %in% merge_drugWords$LinkId,]
+
+# interpolate missing duration with median
+numerical_diagnosisDataset_X$duration[is.na(numerical_diagnosisDataset_X$duration)] <- quantile(numerical_diagnosisDataset_X$duration, na.rm = T)[3]
+words_diagnosisDataset_X$duration[is.na(words_diagnosisDataset_X$duration)] <- quantile(words_diagnosisDataset_X$duration, na.rm = T)[3]
+
+# export age and gender information
+write.table(numerical_diagnosisDataset_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_ageSex.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(words_diagnosisDataset_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_ageSex.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
 # n = 145
 # x = c(1:(n-1))

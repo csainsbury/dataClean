@@ -17,14 +17,39 @@ words_hba1c = read.csv("~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWor
 words_sbp = read.csv("~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_sbp.csv", header = T)
 words_bmi = read.csv("~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_bmi.csv", header = T)
 
-## find deltas
+## find deltas and save out
 # numerical drug data
-numerical_hba1c_yDelta <- numericalDelta(numerical_hba1c, finalStepBins)
-numerical_sbp_yDelta <- numericalDelta(numerical_sbp, finalStepBins)
-numerical_bmi_yDelta <- numericalDelta(numerical_bmi, finalStepBins)
+write.table(numericalDelta(numerical_hba1c, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_hba1c_yDelta.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(numericalDelta(numerical_sbp, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_sbp_yDelta.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(numericalDelta(numerical_bmi, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_bmi_yDelta.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
 # word drug data
-words_hba1c_yDelta <- numericalDelta(words_hba1c, finalStepBins)
-words_sbp_yDelta <- numericalDelta(words_sbp, finalStepBins)
-words_bmi_yDelta <- numericalDelta(words_bmi, finalStepBins)
+write.table(numericalDelta(words_hba1c, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_hba1c_yDelta.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(numericalDelta(words_sbp, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_sbp_yDelta.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(numericalDelta(words_bmi, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_bmi_yDelta.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+
+## zero out final section of datafiles for input into RNN
+finalZero <- function(inputFrame, finalStepBins) {
+  finalCol = ncol(inputFrame)
+  inputFrame[, ((finalCol - finalStepBins) + 1) : finalCol] <- 0
+  return(inputFrame)
+}
+
+## pad with zeros and save out
+# numerical drug data
+write.table(finalZero(numerical_hba1c, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_hba1c_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(finalZero(numerical_sbp, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_sbp_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(finalZero(numerical_bmi, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_bmi_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+
+# word drug data
+write.table(finalZero(words_hba1c, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_hba1c_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(finalZero(words_sbp, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_sbp_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(finalZero(words_bmi, finalStepBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_bmi_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+
+## save out age, sex and duration information in expanded form for RNN import
+numerical_ageSex = read.csv("~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_ageSex.csv", header = T)
+words_ageSex = read.csv("~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_ageSex.csv", header = T)
+
+# need to write a function to expand the age and sex parameters to 96 identical cols
+
 
