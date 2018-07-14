@@ -57,19 +57,23 @@ expansionFunction <- function(patternFrame, inputVector) {
   return(newFrame)
 }
 
+# expand numerical drug parameter set
 numerical_age_X <- expansionFunction(numerical_hba1c, numerical_ageSex$age)
 numerical_sex_X <- expansionFunction(numerical_hba1c, numerical_ageSex$sex)
 numerical_duration_X <- expansionFunction(numerical_hba1c, numerical_ageSex$duration)
 
+# expand word drug parameter set
 words_age_X <- expansionFunction(words_hba1c, words_ageSex$age)
 words_sex_X <- expansionFunction(words_hba1c, words_ageSex$sex)
 words_duration_X <- expansionFunction(words_hba1c, words_ageSex$duration)
 
 # write out age, sex and duration params
+# numerical drug sets
 write.table(numerical_age_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_age_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 write.table(numerical_sex_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_sex_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 write.table(numerical_duration_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numerical_duration_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
+# word drug sets
 write.table(words_age_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_age_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 write.table(words_sex_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_sex_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 write.table(words_duration_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/words_duration_X.csv", sep = ",", row.names = FALSE, col.names = TRUE)
