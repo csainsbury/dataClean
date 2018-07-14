@@ -50,24 +50,33 @@ dbpComplete_drugWordData = dbp_spline[dbp_spline$LinkId %in% merge_drugWords$Lin
 bmiComplete_drugWordData = bmi_spline[bmi_spline$LinkId %in% merge_drugWords$LinkId,]
 drugs_drugWordData = drugWords[drugWords$LinkId %in% merge_drugWords$LinkId,]
 
+# n = 145
+# x = c(1:(n-1))
+# plot(x, hba1cComplete[n, 2:n], ylim = c(20, 150))
+# points(x, sbpComplete[n, 2:n], col = "red")
+# points(x, dbpComplete[n, 2:n], col = "pink")
+# points(x, bmiComplete[n, 2:n], col = "blue")
 
+## extract central section for analysis
+## strip ID from data
+paddingBins = 24 # number of bins to remove pre / post section
 
+truncateFunction <- function(inputFrame, numberOfBins) {
+  inputFrame$LinkId <- NULL
+  outputFrame <- inputFrame[, (numberOfBins + 1):(ncol(inputFrame) - numberOfBins)]
+  return(outputFrame)
+}
 
-# write out
-write.table(hba1cComplete, file = "~/R/_workingDirectory/dataClean/hba1cComplete.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(sbpComplete, file = "~/R/_workingDirectory/dataClean/sbpComplete.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(dbpComplete, file = "~/R/_workingDirectory/dataClean/dbpComplete.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(bmiComplete, file = "~/R/_workingDirectory/dataClean/bmiComplete.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+# export numerical drug data files
+write.table(truncateFunction(hba1cComplete_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_hba1c.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(sbpComplete_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_sbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(dbpComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_sbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(bmiComplete_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_bmi.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(drugs_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_drugs.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
-
-n = 145
-x = c(1:(n-1))
-plot(x, hba1cComplete[n, 2:n], ylim = c(20, 150))
-points(x, sbpComplete[n, 2:n], col = "red")
-points(x, dbpComplete[n, 2:n], col = "pink")
-points(x, bmiComplete[n, 2:n], col = "blue")
-
-# handle drug combinations over similar time span
-
-
-
+# export word drug data files
+write.table(truncateFunction(hba1cComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugwords_hba1c.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(sbpComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_sbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(dbpComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_dbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(bmiComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_bmi.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(drugs_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_drugs.csv", sep = ",", row.names = FALSE, col.names = TRUE)
