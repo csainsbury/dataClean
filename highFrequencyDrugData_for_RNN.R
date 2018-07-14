@@ -502,6 +502,7 @@ drugWordFrame$LinkId <- 0
 
     # write out sequence for analysis
     write.table(numericalDrugsFrame, file = paste("~/R/_workingDirectory/dataClean/numericalDrugsFrame_", startRuninPeriod, "_to_", endRuninPeriod, "_simplifiedDrugs_", binLengthMonths,"mBins.csv", sep=""), sep=",", row.names = FALSE)
+    
     # write out sequence for analysis
     write.table(drugWordFrame_mortality, file = paste("~/R/_workingDirectory/dataClean/drugWordFrame_mortality_", startRuninPeriod, "_to_", endRuninPeriod, "_simplifiedDrugs_", binLengthMonths,"mBins.csv", sep=""), sep=",", row.names = FALSE)
     
