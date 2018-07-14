@@ -51,5 +51,16 @@ numerical_ageSex = read.csv("~/R/_workingDirectory/dataClean/high_f_dataFiles/nu
 words_ageSex = read.csv("~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_ageSex.csv", header = T)
 
 # need to write a function to expand the age and sex parameters to 96 identical cols
+expansionFunction <- function(patternFrame, inputVector) {
+  newFrame <- as.data.frame(matrix(0, nrow = nrow(patternFrame), ncol = ncol(patternFrame)))
+  newFrame[, 1:ncol(newFrame)] <- rep(inputVector, ncol(newFrame))
+  return(newFrame)
+}
 
+numerical_age_X <- expansionFunction(numerical_hba1c, numerical_ageSex$age)
+numerical_sex_X <- expansionFunction(numerical_hba1c, numerical_ageSex$sex)
+numerical_duration_X <- expansionFunction(numerical_hba1c, numerical_ageSex$duration)
 
+words_age_X <- expansionFunction(words_hba1c, words_ageSex$age)
+words_sex_X <- expansionFunction(words_hba1c, words_ageSex$sex)
+words_duration_X <- expansionFunction(words_hba1c, words_ageSex$duration)
