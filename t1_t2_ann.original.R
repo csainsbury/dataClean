@@ -197,9 +197,9 @@ balancingT2set <- diagnostic_test_set_withoutID[diabetesType == 0][balancingSamp
 
 balancedData <- rbind(diagnostic_test_set_withoutID[diabetesType == 1], balancingT2set)
 
-
 write.table(diagnostic_test_set_withoutID, file = "~/R/_workingDirectory/dataClean/diagSet_quasiTS.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 # write.table(diagnostic_test_set_withID, file = "~/R/_workingDirectory/t1_t2_ANN/diagSet_7p_withID.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(balancedData, file = "~/R/_workingDirectory/dataClean/diagSet_quasiTS_balanced.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
 '''
 ## read in csv output from ann

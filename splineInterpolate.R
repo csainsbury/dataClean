@@ -129,14 +129,14 @@ write.table(dbpComplete, file = "~/R/_workingDirectory/dataClean/dbpComplete.csv
 write.table(bmiComplete, file = "~/R/_workingDirectory/dataClean/bmiComplete.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
 
-
-
-
 n = 145
-x = c(1:60)
+x = c(1:120)
 plot(x, hba1cComplete[n, 2:61], ylim = c(20, 150))
 points(x, sbpComplete[n, 2:61], col = "red")
 points(x, dbpComplete[n, 2:61], col = "pink")
 points(x, bmiComplete[n, 2:61], col = "blue")
+
+# handle drug combinations over similar time span
+
 
 
