@@ -376,7 +376,7 @@ drugsetDT <- transform(drugsetDT,id=as.numeric(factor(LinkId)))
 # time bins derived in same was as in splineInterpolate.R
 startDate_unix <- returnUnixDateTime(startRuninPeriod)
 endDate_unix <- returnUnixDateTime(endRuninPeriod)
-nBins = 72 # number of bins wanted
+nBins = 1440 # number of bins wanted
 nBins = nBins - 1
 
 # set time bins

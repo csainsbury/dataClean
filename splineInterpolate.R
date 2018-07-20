@@ -89,8 +89,8 @@ cleanBMIData <- read.csv("~/R/GlCoSy/SD_workingSource/BMIsetDTclean.csv", sep=",
   bmiLimited <- data.frame(cleanBMIData$LinkId, cleanBMIData$bmiNumeric, cleanBMIData$dateplustime1); colnames(bmiLimited) <- c("LinkId", "numericValue", "dateplustime1")
   bmiLimited <- data.table(bmiLimited)
 
-splineInterpol(hba1cLimited, "2011-01-01", "2017-01-01", 120, 8, 20, 200, "hba1c_6y")
-splineInterpol(sbpLimited, "2012-01-01", "2017-01-01", 60, 8, 80, 240, "sbp_5y")
-splineInterpol(dbpLimited, "2012-01-01", "2017-01-01", 60, 8, 40, 160, "dbp_5y")
-splineInterpol(bmiLimited, "2012-01-01", "2017-01-01", 60, 6, 16, 100, "bmi_5y")
+splineInterpol(hba1cLimited, "2011-01-01", "2017-01-01", 1440, 8, 20, 200, "hba1c_6_shfy")
+splineInterpol(sbpLimited, "2012-01-01", "2017-01-01", 1440, 8, 80, 240, "sbp_6y_shf")
+splineInterpol(dbpLimited, "2012-01-01", "2017-01-01", 1440, 8, 40, 160, "dbp_6y_shf")
+splineInterpol(bmiLimited, "2012-01-01", "2017-01-01", 1440, 6, 16, 100, "bmi_6y_shf")
 
