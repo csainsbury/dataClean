@@ -58,10 +58,10 @@ from keras.layers import Dropout
 
 # ann
 
-dense_node_n = 512
-ann_dropout = 0.8
+dense_node_n = 64
+ann_dropout = 0.3
 
-n_epochs = 20
+n_epochs = 35
 n_batch_size = 128
 
 import numpy as np
@@ -70,6 +70,10 @@ from keras.layers import Dense, Dropout
 
 model = Sequential()
 model.add(Dense(dense_node_n, input_dim=160, activation='relu'))
+model.add(Dropout(ann_dropout))
+model.add(Dense(dense_node_n, activation='relu'))
+model.add(Dropout(ann_dropout))
+model.add(Dense(dense_node_n, activation='relu'))
 model.add(Dropout(ann_dropout))
 model.add(Dense(dense_node_n, activation='relu'))
 model.add(Dropout(ann_dropout))

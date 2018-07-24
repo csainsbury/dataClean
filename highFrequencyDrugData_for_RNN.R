@@ -278,6 +278,8 @@ simplifyDrugs <- function(inputFrame) {
   return(outputFrame)
 }
 
+n_finalDrugBins = 144 # should match with nBins from splineInterpolate.R
+
 
 # generate node and link files
 drugDataSet <- read.csv("~/R/GlCoSy/SDsource/Export_all_diabetes_drugs.txt",header=TRUE,row.names=NULL)
@@ -376,7 +378,7 @@ drugsetDT <- transform(drugsetDT,id=as.numeric(factor(LinkId)))
 # time bins derived in same was as in splineInterpolate.R
 startDate_unix <- returnUnixDateTime(startRuninPeriod)
 endDate_unix <- returnUnixDateTime(endRuninPeriod)
-nBins = 1440 # number of bins wanted
+nBins = 72 # number of bins wanted
 nBins = nBins - 1
 
 # set time bins
@@ -443,14 +445,61 @@ drugWordFrame$LinkId <- 0
     
     # the bin frequency is 0.5 that in splineInterpolation.R (72 bins vs 144)
     # need to replicate the dataframe, and then interleave to give 2 bins for every original time bin (bringing total n back to 144)
-    drugWordFrame_1 <- drugWordFrame[, 1:72]
-    drugWordFrame_2 <- drugWordFrame[, 1:72]
     
-    doubledFrame = cbind(drugWordFrame_1, drugWordFrame_2)
-    indx <- rbind(names(drugWordFrame_1),names(drugWordFrame_2))
+    drugWordFrame_postLoop <- drugWordFrame # establish a copy of drugWordFrame
     
-    interleavedFrame <- doubledFrame[, indx]
-    colnames(interleavedFrame) <- c(1:ncol(interleavedFrame))
+      # interpolate LVCF for drugs
+      lvcfFrame = drugWordFrame_postLoop
+      lvcfFrame[lvcfFrame == "nil"] <- NA
+      
+      replace_na_with_last<-function(x,a=!is.na(x)){
+        x[which(a)[c(1,1:sum(a))][cumsum(a)+1]]
+      }
+      
+      yy = apply(lvcfFrame, 2, replace_na_with_last)
+      
+      lvcf_drugWordFrame = as.data.frame(yy)
+ 
+    replace_na_with_last<-function(x,a=!is.na(x)){
+      x[which(a)[c(1,1:sum(a))][cumsum(a)+1]]
+    }
+    
+    
+    
+    interleave_nTimes <- function(inputFrame, finalN) { # finalN = the numerical TS bin number eg 144, 288 etc
+      # finalN = 288; inputFrame = drugWordFrame
+      loopN = finalN / (nBins + 1)
+      
+      inputFrameMinusID <- inputFrame[, 1 : (ncol(inputFrame) - 1)] # remove ID
+      
+      if(loopN == 2) {
+        drugWordFrame_1 <- inputFrameMinusID
+        drugWordFrame_2 <- inputFrameMinusID
+        
+        doubledFrame = cbind(drugWordFrame_1, drugWordFrame_2)
+        indx <- rbind(names(drugWordFrame_1),names(drugWordFrame_2))
+        
+        interleavedFrame <- doubledFrame[, indx]
+        colnames(interleavedFrame) <- c(1:ncol(interleavedFrame))
+      }
+      
+      if(loopN == 4) {
+        drugWordFrame_1 <- inputFrameMinusID
+        drugWordFrame_2 <- inputFrameMinusID
+        drugWordFrame_3 <- inputFrameMinusID
+        drugWordFrame_4 <- inputFrameMinusID
+        
+        doubledFrame = cbind(drugWordFrame_1, drugWordFrame_2, drugWordFrame_4, drugWordFrame_4)
+        indx <- rbind(names(drugWordFrame_1),names(drugWordFrame_2), names(drugWordFrame_3), names(drugWordFrame_4))
+        
+        interleavedFrame <- doubledFrame[, indx]
+        colnames(interleavedFrame) <- c(1:ncol(interleavedFrame))
+      }
+      
+      return(interleavedFrame)
+    }
+    
+    interleavedFrame = interleave_nTimes(drugWordFrame, n_finalDrugBins)
     
     # reattach Link ID
     interleavedFrame_withID <- cbind(interleavedFrame, drugWordFrame[, (ncol(drugWordFrame))])

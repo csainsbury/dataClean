@@ -16,3 +16,14 @@ generate a set with data for all parameters.
 outcomeGenerator.R
 generate the outcome (hba1c/sbp diff files etc)
 extract the central data (4y from a 6y set etc) to minimise artefact from interpolation
+
+200718
+numerical TS files produced with 288 bins
+drugs produced with 72 bins
+perform a LVCF on text, then expand to 288 bins
+generate lookup and tokenised versions
+output matching text/numerical files
+
+done
+
+

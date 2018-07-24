@@ -11,14 +11,15 @@ returnUnixDateTime<-function(date) {
 n_years = 6
 
 # load data back in
-hba1c_spline <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/hba1c_', n_years, 'y_limitedValues.csv', sep = ""), header = T)
-sbp_spline <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/sbp_', n_years, 'y_limitedValues.csv', sep = ""), header = T)
-dbp_spline <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/dbp_', n_years, 'y_limitedValues.csv', sep = ""), header = T)
-bmi_spline <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/bmi_', n_years, 'y_limitedValues.csv', sep = ""), header = T)
+hba1c_spline <- read.csv(paste('./hba1c_', n_years, 'y_shf_limitedValues.csv', sep = ""), header = T)
+sbp_spline <- read.csv(paste('./sbp_', n_years, 'y_shf_limitedValues.csv', sep = ""), header = T)
+dbp_spline <- read.csv(paste('./dbp_', n_years, 'y_shf_limitedValues.csv', sep = ""), header = T)
+bmi_spline <- read.csv(paste('./bmi_', n_years, 'y_shf_limitedValues.csv', sep = ""), header = T)
 
-numericalDrugs <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrugsFrame_withID_', n_years, 'y.csv', sep = ""), header = T)
+numericalDrugs <- read.csv(paste('./numericalDrugsFrame_withID_', n_years, 'y_shf.csv', sep = ""), header = T)
 colnames(numericalDrugs)[ncol(numericalDrugs)] <- c("LinkId")
-drugWords <- read.csv(paste('~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWordFrame_withID_', n_years, 'y.csv', sep = ""), header = T)
+drugWords <- read.csv(paste('./drugWordFrame_mortality_', n_years, 'y.csv', sep = ""), header = T)
+drugWords = drugWords[, 1:289]
 
 
 # generate LinkId single column frames
@@ -56,6 +57,7 @@ dbpComplete_drugWordData = dbp_spline[dbp_spline$LinkId %in% merge_drugWords$Lin
 bmiComplete_drugWordData = bmi_spline[bmi_spline$LinkId %in% merge_drugWords$LinkId,]
 drugs_drugWordData = drugWords[drugWords$LinkId %in% merge_drugWords$LinkId,]
 
+'''
 ## generate age and gender information
 diagnosisDataset<-read.csv("~/R/GlCoSy/SDsource/demogALL.txt", quote = "", row.names = NULL, stringsAsFactors = FALSE)
 diagnosisDataset_sub <- data.frame(diagnosisDataset$LinkId, diagnosisDataset$CurrentGender_Mapped, diagnosisDataset$BirthDate, diagnosisDataset$DateOfDiagnosisDiabetes_Date); colnames(diagnosisDataset_sub) <- c("LinkId", "sex", "birthDate", "diagnosisDate")
@@ -66,6 +68,9 @@ diagnosisDataset_sub$duration = returnUnixDateTime("2011-01-01") - (returnUnixDa
 diagnosisDataset_sub$duration = diagnosisDataset_sub$duration / (60*60*24*365.25)
 diagnosisDataset_sub$birthDate <- NULL
 diagnosisDataset_sub$diagnosisDate <- NULL
+'''
+diagnosisDataset_sub <- read.csv("./diagnosisDataset_sub.csv", header = T)
+
 
 numerical_diagnosisDataset_X = diagnosisDataset_sub[diagnosisDataset_sub$LinkId %in% merge_numericalDrugs$LinkId,]
 words_diagnosisDataset_X = diagnosisDataset_sub[diagnosisDataset_sub$LinkId %in% merge_drugWords$LinkId,]
@@ -75,8 +80,8 @@ numerical_diagnosisDataset_X$duration[is.na(numerical_diagnosisDataset_X$duratio
 words_diagnosisDataset_X$duration[is.na(words_diagnosisDataset_X$duration)] <- quantile(words_diagnosisDataset_X$duration, na.rm = T)[3]
 
 # export age and gender information
-write.table(numerical_diagnosisDataset_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_ageSex.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(words_diagnosisDataset_X, file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_ageSex.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(numerical_diagnosisDataset_X, file = "./numericalDrug_ageSex.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(words_diagnosisDataset_X, file = "./drugWords_ageSex.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
 # n = 145
 # x = c(1:(n-1))
@@ -87,7 +92,7 @@ write.table(words_diagnosisDataset_X, file = "~/R/_workingDirectory/dataClean/hi
 
 ## extract central section for analysis
 ## strip ID from data
-paddingBins = 24 # number of bins to remove pre / post section
+paddingBins = 48 # number of bins to remove pre / post section
 
 truncateFunction <- function(inputFrame, numberOfBins) {
   inputFrame$LinkId <- NULL
@@ -96,15 +101,15 @@ truncateFunction <- function(inputFrame, numberOfBins) {
 }
 
 # export numerical drug data files
-write.table(truncateFunction(hba1cComplete_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_hba1c.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(truncateFunction(sbpComplete_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_sbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(truncateFunction(dbpComplete_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_dbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(truncateFunction(bmiComplete_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_bmi.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(truncateFunction(drugs_numericalDrugData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/numericalDrug_drugs.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(hba1cComplete_numericalDrugData, paddingBins), file = "./numericalDrug_hba1c.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(sbpComplete_numericalDrugData, paddingBins), file = "./numericalDrug_sbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(dbpComplete_drugWordData, paddingBins), file = "./numericalDrug_sbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(bmiComplete_numericalDrugData, paddingBins), file = "./numericalDrug_bmi.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(drugs_numericalDrugData, paddingBins), file = "./numericalDrug_drugs.csv", sep = ",", row.names = FALSE, col.names = TRUE)
 
 # export word drug data files
-write.table(truncateFunction(hba1cComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugwords_hba1c.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(truncateFunction(sbpComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_sbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(truncateFunction(dbpComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_dbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(truncateFunction(bmiComplete_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_bmi.csv", sep = ",", row.names = FALSE, col.names = TRUE)
-write.table(truncateFunction(drugs_drugWordData, paddingBins), file = "~/R/_workingDirectory/dataClean/high_f_dataFiles/drugWords_drugs.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(hba1cComplete_drugWordData, paddingBins), file = "./drugwords_hba1c.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(sbpComplete_drugWordData, paddingBins), file = "./drugWords_sbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(dbpComplete_drugWordData, paddingBins), file = "./drugWords_dbp.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(bmiComplete_drugWordData, paddingBins), file = "./drugWords_bmi.csv", sep = ",", row.names = FALSE, col.names = TRUE)
+write.table(truncateFunction(drugs_drugWordData, paddingBins), file = "./drugWords_drugs.csv", sep = ",", row.names = FALSE, col.names = TRUE)
